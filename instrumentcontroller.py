@@ -4,32 +4,27 @@ from os.path import isfile
 from PyQt5.QtCore import QObject, pyqtSlot
 
 from arduino.programmerfactory import ProgrammerFactory
-from instr.instrumentfactory import NetworkAnalyzerFactory, mock_enabled
+from instr.instrumentfactory import AnalyzerFactory, mock_enabled, SourceFactory, GeneratorFactory
 from measureresult import MeasureResult
 
 
 class InstrumentController(QObject):
-    phases = [
-        22.5,
-        45.0,
-        90.0,
-        180.0
-    ]
-
-    states = {
-        i * 5.625: i for i in range(64)
-    }
-
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
         self.requiredInstruments = {
-            'Анализатор': NetworkAnalyzerFactory('GPIB1::9::INSTR'),
+            'Анализатор': AnalyzerFactory('GPIB0::9::INSTR'),
+            'Осциллограф': AnalyzerFactory('GPIB0::9::INSTR'),
+            # 'Осциллограф': OscilloscopeFactory('GPIB0::9::INSTR'),
+            'Источник 1': SourceFactory('GPIB0::1::INSTR'),
+            'Источник 2': SourceFactory('GPIB0::2::INSTR'),
+            'Генератор 1': GeneratorFactory('GPIB0::3::INSTR'),
+            'Генератор 2': GeneratorFactory('GPIB0::4::INSTR'),
             'Программатор': ProgrammerFactory('COM5')
         }
 
         self.deviceParams = {
-            'Цифровой аттенюатор-фазовращатель': {
+            'Цифровой делитель': {
                 'F': [1.15, 1.35, 1.75, 1.92, 2.25, 2.54, 2.7, 3, 3.47, 3.86, 4.25],
                 'mul': 2,
                 'P1': 15,
@@ -155,39 +150,27 @@ class InstrumentController(QObject):
         prog = self._instruments['Программатор']
 
         out = []
-        att_codes = secondary['att_codes']
-        psm_codes = secondary['psm_codes']
 
-        # test string: 1,2,5-9,20,20-27,63
-        for att_code in att_codes:
-            for psm_code in psm_codes:
-                self._phase_codes.append(psm_code)
-                self._att_codes.append(att_code)
+        for _ in range(3):
+            if not mock_enabled:
+                time.sleep(0.5)
 
-                prog.set_att_psm_code(att_code, psm_code)
+            pna.send(f'CALC1:PAR:SEL "CH1_S21"')
+            pna.query('*OPC?')
+            res = pna.query(f'CALC1:DATA:SNP? 2')
 
-                if not mock_enabled:
-                    time.sleep(0.5)
+            # pna.send(f'CALC:DATA:SNP:PORTs:Save "1,2", "d:/ksa/psm_att/s_{att_code}_{psm_code}.s2p"')
+            # pna.send(f'MMEM:STOR "d:/ksa/psm_att1/s_{att_code}_{psm_code}.s2p"')
 
-                pna.send(f'CALC1:PAR:SEL "CH1_S21"')
-                pna.query('*OPC?')
-                res = pna.query(f'CALC1:DATA:SNP? 2')
+            if mock_enabled:
+                # with open(f'ref/sample_data/s_{att_code}_{psm_code}.s2p', mode='rt', encoding='utf-8') as f:
+                #     res = list(f.readlines())[0].strip()
+                print(_)
+            out.append(parse_float_list(res))
 
-                pna.send(f'CALC:DATA:SNP:PORTs:Save "1,2", "d:/ksa/psm_att/s_{att_code}_{psm_code}.s2p"')
-                pna.send(f'MMEM:STOR "d:/ksa/psm_att1/s_{att_code}_{psm_code}.s2p"')
-
-                if mock_enabled:
-                    with open(f'ref/sample_data/s_{att_code}_{psm_code}.s2p', mode='rt', encoding='utf-8') as f:
-                        res = list(f.readlines())[0].strip()
-                out.append(parse_float_list(res))
-
-                if not mock_enabled:
-                    time.sleep(0.5)
+            if not mock_enabled:
+                time.sleep(0.5)
         return out
-
-    def pow_sweep(self):
-        print('pow sweep')
-        return [4, 5, 6], [4, 5, 6]
 
     @pyqtSlot(dict)
     def on_secondary_changed(self, params):

@@ -14,7 +14,7 @@
    <string>Измерение параметров аттенюаторов-фазовращателей</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,12">
+   <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,11">
     <item>
      <layout class="QVBoxLayout" name="layInstrs">
       <property name="spacing">

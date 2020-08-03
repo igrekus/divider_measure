@@ -8,7 +8,6 @@ from connectionwidget import ConnectionWidget
 from measuremodel import MeasureModel
 from measurewidget import MeasureWidgetWithSecondaryParameters
 from sparamplotwidget import SParamPlotWidget
-from statwidget import StatWidget
 
 
 class MainWindow(QMainWindow):
@@ -31,12 +30,9 @@ class MainWindow(QMainWindow):
         self._measureModel = MeasureModel(parent=self, controller=self._instrumentController)
         self._sParamPlotWidget = SParamPlotWidget(parent=self, result=self._instrumentController.result)
 
-        self._statWidget = StatWidget(parent=self, result=self._instrumentController.result)
-
         # init UI
         self._ui.layInstrs.insertWidget(0, self._connectionWidget)
         self._ui.layInstrs.insertWidget(1, self._measureWidget)
-        self._ui.layInstrs.insertWidget(2, self._statWidget, 10)
 
         self._ui.tabWidget.insertTab(0, self._sParamPlotWidget, 'S-параметры')
         self._init()
@@ -51,8 +47,6 @@ class MainWindow(QMainWindow):
         self._measureWidget.measureComplete.connect(self._measureModel.update)
         self._measureWidget.measureComplete.connect(self.on_measureComplete)
 
-        # self._ui.tableMeasure.setModel(self._measureModel)
-
         self.refreshView()
 
         self._measureWidget.on_params_changed(1)
@@ -63,8 +57,6 @@ class MainWindow(QMainWindow):
 
     def resizeTable(self):
         pass
-        # self._ui.tableMeasure.resizeRowsToContents()
-        # self._ui.tableMeasure.resizeColumnsToContents()
 
     # event handlers
     def resizeEvent(self, event):
@@ -77,12 +69,9 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def on_measureComplete(self):
         print('meas complete')
-        # self._plotWidget.preparePlots(self._instrumentController.secondaryParams)
 
         # TODO tmp disable
-        self._sParamPlotWidget.plot()
-
-        self._statWidget.stats = self._instrumentController.result.stats
+        # self._sParamPlotWidget.plot()
 
     @pyqtSlot()
     def on_measureStarted(self):

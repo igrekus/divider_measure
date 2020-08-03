@@ -1,8 +1,6 @@
-from itertools import chain
-
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QRunnable, QThreadPool
-from PyQt5.QtWidgets import QWidget, QDoubleSpinBox, QLineEdit
+from PyQt5.QtWidgets import QWidget, QDoubleSpinBox
 
 from deviceselectwidget import DeviceSelectWidget
 
@@ -122,8 +120,6 @@ class MeasureWidget(QWidget):
         self._devices.enabled = False
 
 
-main_codes = [0, 1, 2, 4, 8, 16, 32, 63]
-
 
 class MeasureWidgetWithSecondaryParameters(MeasureWidget):
     secondaryChanged = pyqtSignal(dict)
@@ -180,12 +176,6 @@ class MeasureWidgetWithSecondaryParameters(MeasureWidget):
         self._spinFreq2.setValue(self._spinFreqEnd.value())
         self._devices._layout.addRow('Fгр2=', self._spinFreq2)
 
-        self._editAttCode = QLineEdit(parent=self, text='1,2,5-9,20,20-27,63')
-        self._devices._layout.addRow('Сост. атт.', self._editAttCode)
-
-        self._editPsmCode = QLineEdit(parent=self, text='1,2,5-9,20,20-27,63')
-        self._devices._layout.addRow('Сост. фвр.', self._editPsmCode)
-
         self._connectSignals()
 
     def _connectSignals(self):
@@ -202,31 +192,23 @@ class MeasureWidgetWithSecondaryParameters(MeasureWidget):
         self._spinFreq1.valueChanged.connect(self.on_spinFreq1_valueChanged)
         self._spinFreq2.valueChanged.connect(self.on_spinFreq2_valueChanged)
 
-        self._editAttCode.textChanged.connect(self.on_params_changed)
-        self._editPsmCode.textChanged.connect(self.on_params_changed)
-
         self.on_spinFreqStart_valueChanged(2.0)
         self.on_spinFreqEnd_valueChanged(4.0)
 
     def _modePreConnect(self):
         super()._modePreConnect()
-        # self._spinFreq.setEnabled(True)
 
     def _modePreCheck(self):
         super()._modePreCheck()
-        # self._spinFreq.setEnabled(True)
 
     def _modeDuringCheck(self):
         super()._modeDuringCheck()
-        # self._spinFreq.setEnabled(False)
 
     def _modePreMeasure(self):
         super()._modePreMeasure()
-        # self._spinFreq.setEnabled(False)
 
     def _modeDuringMeasure(self):
         super()._modeDuringMeasure()
-        # self._spinFreq.setEnabled(False)
 
     def check(self):
         print('subclass checking...')
@@ -264,7 +246,7 @@ class MeasureWidgetWithSecondaryParameters(MeasureWidget):
     def on_spinFreq2_valueChanged(self, value):
         self._spinFreq1.setMaximum(value)
 
-    def on_params_changed(self, value):
+    def on_params_changed(self, _):
         params = {
             'Pin': self._spinPowIn.value(),
             'F1': self._spinFreqStart.value(),
@@ -272,19 +254,5 @@ class MeasureWidgetWithSecondaryParameters(MeasureWidget):
             'kp': self._spinState.value(),
             'Fborder1': self._spinFreq1.value(),
             'Fborder2': self._spinFreq2.value(),
-            'att_codes': list(main_codes) if not self._editAttCode.text() else _parse(self._editAttCode.text()),
-            'psm_codes': list(main_codes) if not self._editPsmCode.text() else _parse(self._editPsmCode.text())
         }
         self.secondaryChanged.emit(params)
-
-
-def _parse(raw):
-    return sorted(set(main_codes + list(chain(*[_convert(v) for v in raw.replace(' ', '').strip(',').strip('-').split(',')]))))
-
-
-def _convert(value):
-    if '-' not in value:
-        return [int(value)]
-    else:
-        v1, v2 = map(int, value.split('-'))
-        return range(v1, v2 + 1)
