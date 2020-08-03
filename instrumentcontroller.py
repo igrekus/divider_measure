@@ -4,7 +4,7 @@ from os.path import isfile
 from PyQt5.QtCore import QObject, pyqtSlot
 
 from arduino.programmerfactory import ProgrammerFactory
-from instr.instrumentfactory import AnalyzerFactory, mock_enabled, SourceFactory, GeneratorFactory
+from instr.instrumentfactory import AnalyzerFactory, mock_enabled, SourceFactory, GeneratorFactory, OscilloscopeFactory
 from measureresult import MeasureResult
 
 
@@ -14,8 +14,7 @@ class InstrumentController(QObject):
 
         self.requiredInstruments = {
             'Анализатор': AnalyzerFactory('GPIB0::9::INSTR'),
-            'Осциллограф': AnalyzerFactory('GPIB0::9::INSTR'),
-            # 'Осциллограф': OscilloscopeFactory('GPIB0::9::INSTR'),
+            'Осциллограф': OscilloscopeFactory('GPIB0::6::INSTR'),
             'Источник 1': SourceFactory('GPIB0::1::INSTR'),
             'Источник 2': SourceFactory('GPIB0::2::INSTR'),
             'Генератор 1': GeneratorFactory('GPIB0::3::INSTR'),
