@@ -85,7 +85,39 @@ class InstrumentController(QObject):
 
     def _runCheck(self, param, secondary):
         print(f'run check with {param}, {secondary}')
-        return True
+        src1 = self._instruments['Источник 1']
+        src2 = self._instruments['Источник 2']
+        prog = self._instruments['Программатор']
+
+        src1.set_voltage(chan=1, value=3.15, unit='V')
+        src1.set_current(chan=1, value=5, unit='mA')
+
+        src1.set_voltage(chan=2, value=3.15, unit='V')
+        src1.set_current(chan=2, value=30, unit='mA')
+
+        src1.set_output(chan=2, state='ON')
+        src1.set_output(chan=1, state='ON')
+
+        time.sleep(0.5)
+
+        current_ch1 = src1.read_current(chan=1)
+        current_ch2 = src1.read_current(chan=2)
+        total_current_before = current_ch1 + current_ch2
+
+        src1.set_voltage(chan=2, value=2.85, unit='V')
+        src1.set_voltage(chan=1, value=2.85, unit='V')
+
+        prog.send('data packet')
+
+        time.sleep(0.5)
+
+        current_ch1 = src1.read_current(chan=1)
+        current_ch2 = src1.read_current(chan=2)
+        total_current_after = current_ch1 + current_ch2
+
+        drop = total_current_before / total_current_after
+
+        return drop > 2
 
     def measure(self, params):
         print(f'call measure with {params}')
