@@ -58,14 +58,6 @@ class InstrumentController(QObject):
 
         self.result = MeasureResult()
 
-        self._freqs = list()
-        self._mag_s11s = list()
-        self._mag_s22s = list()
-        self._mag_s21s = list()
-        self._phs_s21s = list()
-        self._phase_codes = list()
-        self._att_codes = list()
-
     def __str__(self):
         return f'{self._instruments}'
 
@@ -98,12 +90,10 @@ class InstrumentController(QObject):
     def measure(self, params):
         print(f'call measure with {params}')
         device, secondary = params
-        self.result.raw_data = \
-            self.sweep_points, \
-            self._measure(device, secondary), \
-            self._phase_codes, \
-            self._att_codes, \
-            self.secondaryParams
+
+        # TODO send measure results properly
+
+        self.result.raw_data = [1, 2, 3]
         # self.hasResult = bool(self.result)
         self.hasResult = True
 
@@ -118,8 +108,7 @@ class InstrumentController(QObject):
         return self._measure_s_params(secondary)
 
     def _clear(self):
-        self._phase_codes.clear()
-        self._att_codes.clear()
+        pass
 
     def _init(self, params):
         pna = self._instruments['Анализатор']
