@@ -13,13 +13,13 @@ class InstrumentController(QObject):
         super().__init__(parent=parent)
 
         self.requiredInstruments = {
-            'Анализатор': AnalyzerFactory('GPIB0::9::INSTR'),
-            'Осциллограф': OscilloscopeFactory('GPIB0::6::INSTR'),
-            'Источник 1': SourceFactory('GPIB0::1::INSTR'),
-            'Источник 2': SourceFactory('GPIB0::2::INSTR'),
-            'Генератор 1': GeneratorFactory('GPIB0::3::INSTR'),
-            'Генератор 2': GeneratorFactory('GPIB0::4::INSTR'),
-            'Программатор': ProgrammerFactory('COM5')
+            # 'Анализатор': AnalyzerFactory('GPIB0::9::INSTR'),
+            # 'Осциллограф': OscilloscopeFactory('USB0::0x0957::0x17A4::MY51452204::0::INSTR'),
+            'Источник 1': SourceFactory('GPIB1::3::INSTR'),
+            # 'Источник 2': SourceFactory('GPIB0::2::INSTR'),
+            # 'Генератор 1': GeneratorFactory('GPIB0::3::INSTR'),
+            # 'Генератор 2': GeneratorFactory('GPIB0::4::INSTR'),
+            'Программатор': ProgrammerFactory('COM12')
         }
 
         self.deviceParams = {
