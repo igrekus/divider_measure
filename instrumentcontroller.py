@@ -86,37 +86,41 @@ class InstrumentController(QObject):
     def _runCheck(self, param, secondary):
         print(f'run check with {param}, {secondary}')
         src1 = self._instruments['Источник 1']
-        src2 = self._instruments['Источник 2']
         prog = self._instruments['Программатор']
 
-        src1.set_voltage(chan=1, value=3.15, unit='V')
-        src1.set_current(chan=1, value=5, unit='mA')
+        src1.send(f'apply p6v,{3.15}V,{5}mA')
+        # src1.set_voltage(chan=1, value=3.15, unit='V')
+        # src1.set_current(chan=1, value=5, unit='mA')
 
-        src1.set_voltage(chan=2, value=3.15, unit='V')
-        src1.set_current(chan=2, value=30, unit='mA')
+        src1.send(f'apply p25v,{3.15}V,{30}mA')
+        # src1.set_voltage(chan=2, value=3.15, unit='V')
+        # src1.set_current(chan=2, value=30, unit='mA')
 
-        src1.set_output(chan=2, state='ON')
-        src1.set_output(chan=1, state='ON')
+        src1.send(f'inst:sel p6v; outp on')
+        src1.send(f'inst:sel p25v; outp on')
+        # src1.set_output(chan=2, state='ON')
+        # src1.set_output(chan=1, state='ON')
 
         time.sleep(0.5)
 
-        current_ch1 = src1.read_current(chan=1)
-        current_ch2 = src1.read_current(chan=2)
+        current_ch1 = src1.send(f'MEAS:CURR? P6V')
+        current_ch2 = src1.send(f'MEAS:CURR? P25V')
         total_current_before = current_ch1 + current_ch2
 
-        src1.set_voltage(chan=2, value=2.85, unit='V')
-        src1.set_voltage(chan=1, value=2.85, unit='V')
+        src1.send(f'apply p6v,{2.85}V,{5}mA')
+        src1.send(f'apply p25v,{2.85}V,{30}mA')
 
-        prog.send('data packet')
+        prog.query('<u.41400000.DF080005>')
 
         time.sleep(0.5)
 
-        current_ch1 = src1.read_current(chan=1)
-        current_ch2 = src1.read_current(chan=2)
+        current_ch1 = src1.send(f'MEAS:CURR? P6V')
+        current_ch2 = src1.send(f'MEAS:CURR? P25V')
+        # current_ch1 = src1.read_current(chan=1)
+        # current_ch2 = src1.read_current(chan=2)
         total_current_after = current_ch1 + current_ch2
 
         drop = total_current_before / total_current_after
-
         return drop > 2
 
     def measure(self, params):
